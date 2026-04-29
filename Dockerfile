@@ -33,6 +33,23 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
         # freeglut3 \
     && rm -rf /var/lib/apt/lists/*
 
+    RUN apt-get update && apt-get install --no-install-recommends -y \
+        # For PulseAudio <--> ALSA sound support.
+        libasound2-plugins \
+    && \
+    echo "pcm.pulse {" > /etc/asound.conf && \
+    echo "  type pulse" >> /etc/asound.conf && \
+    echo "  fallback \"sysdefault\"" >> /etc/asound.conf && \
+    echo "}" >> /etc/asound.conf && \
+    echo "ctl.pulse {" >> /etc/asound.conf && \
+    echo "  type pulse" >> /etc/asound.conf && \
+    echo "  fallback \"sysdefault\"" >> /etc/asound.conf && \
+    echo "}" >> /etc/asound.conf && \
+    echo "pcm.!default \"pulse\"" >> /etc/asound.conf && \
+    echo "ctl.!default \"pulse\"" >> /etc/asound.conf && \
+    apt-get autoclean && \
+    rm -rf /var/lib/apt/lists/*
+    
 RUN groupadd -r renpy && useradd -r -g renpy renpy \
     && mkdir /renpy \
     && chown renpy:renpy /renpy
