@@ -33,7 +33,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
         # freeglut3 \
     && rm -rf /var/lib/apt/lists/*
 
-    RUN apt-get update && apt-get install --no-install-recommends -y \
+RUN apt-get update && apt-get install --no-install-recommends -y \
         # For PulseAudio <--> ALSA sound support.
         libasound2-plugins \
     && \
@@ -49,15 +49,19 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     echo "ctl.!default \"pulse\"" >> /etc/asound.conf && \
     apt-get autoclean && \
     rm -rf /var/lib/apt/lists/*
-    
-RUN groupadd -r renpy && useradd -r -g renpy renpy \
-    && mkdir /renpy \
-    && chown renpy:renpy /renpy
 
+RUN groupadd -r renpy && useradd -r -g renpy renpy && \
+    mkdir /renpy && \
+    chown renpy:renpy /renpy
 
 WORKDIR /renpy
 
-COPY --from=download --chmod=777 /renpy-sdk .
+COPY --from=download --chown=renpy:renpy --chmod=777 /renpy-sdk .
+
+RUN mkdir /saves && \
+    chown renpy:renpy /saves && \
+    chmod 777 /saves
+VOLUME /saves
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
