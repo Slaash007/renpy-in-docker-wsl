@@ -1,11 +1,12 @@
 # Ren'Py in Docker
-
-[<img src="https://img.shields.io/badge/dockerhub-old6ix/renpy-important.svg?logo=docker">](https://hub.docker.com/r/old6ix/renpy/)
+> [!NOTE]
+> This is a fork of [old6ixx/renpy-in-docker](https://github.com/old6ixx/renpy-in-docker) adding sound support for WSL users.
 
 ## Features
 
 - Build distributions for [Ren'Py](https://www.renpy.org/) projects
 - Launch projects through [X11](https://www.x.org/wiki/guide/concepts/)
+  - Sound support when launched from WSL2
 - Support multi architectures: `amd64`, `arm64`, `arm`
 - Run as non-root user by setting `PUID` and `PGID`, like [linuxserver.io does](https://docs.linuxserver.io/general/understanding-puid-and-pgid/)
 
@@ -19,7 +20,7 @@ To build a PC distribution for the official example game, `The Question`, you ca
 
 ```bash
 docker run --rm -it -v ${PWD}/out:/out \
-  old6ix/renpy:8.0.3 launcher distribute ./the_question --dest /out --package pc
+  slaash007/renpy:8.0.3 launcher distribute ./the_question --dest /out --package pc
 ```
 
 Then you will get the distribution in `out/` directory:
@@ -34,10 +35,14 @@ the_question-7.0-pc.zip
 Technically, you can bind your project to nearly any directory you want, but I'd like to choose `/src`.
 
 ```bash
+export RENPY_PROJECT=/path/to/renpy/project
+```
+
+```bash
 docker run --rm -it \
-  -v /path/to/renpy/project:/src \
+  -v ${RENPY_PROJECT}:/src \
   -v /path/to/output:/out \
-  old6ix/renpy:8.0.3 launcher distribute /src --dest /out
+  slaash007/renpy:8.0.3 launcher distribute /src --dest /out
 ```
 
 You should get distributions for different platform in `/path/to/output` directory.
@@ -74,9 +79,16 @@ To run `The Question` as a demo, execute this command:
 
 ```bash
 docker run --rm -it \
+  --cap_drop ALL \
+  --cap_add CAP_SETUID --cap_add CAP_SETGID \
+  --security-opt="no-new-privileges=true" \
   -e DISPLAY \
+  -e PULSE_SERVER=${PULSE_SERVER:-} \
+  -e PULSE_COOKIE=/tmp/pulseaudio.cookie \
   -v /tmp/.X11-unix:/tmp/.X11-unix \
-  old6ix/renpy:8.0.3 ./the_question
+  -v /mnt/wslg/PulseServer:/mnt/wslg/PulseServer \ # Remove if host is not WSL
+  --tmpfs /tmp:mode=1777 \
+  slaash007/renpy:8.0.3 ./the_question
 ```
 
 This window will be displayed on the screen you've set in the first step:
@@ -86,21 +98,38 @@ This window will be displayed on the screen you've set in the first step:
 Or your own game:
 
 ```bash
+export RENPY_PROJECT=/path/to/renpy/project
+```
+
+```bash
 docker run --rm -it \
+  --cap_drop ALL \
+  --cap_add CAP_SETUID --cap_add CAP_SETGID \
+  --security-opt="no-new-privileges=true" \
   -e DISPLAY \
+  -e PULSE_SERVER=${PULSE_SERVER:-} \
+  -e PULSE_COOKIE=/tmp/pulseaudio.cookie \
   -v /tmp/.X11-unix:/tmp/.X11-unix \
-  -v /path/to/renpy/project:/src \
-  old6ix/renpy:8.0.3 /src
+  -v /mnt/wslg/PulseServer:/mnt/wslg/PulseServer \ # Remove if host is not WSL
+  --tmpfs /tmp:mode=1777 \
+  -v ${RENPY_PROJECT}:/src \
+  slaash007/renpy:8.0.3 /src
 ```
 
 Apart from unix socket, you can also connect it to the X server by changing the container's network to host mode. This is all about X11, neither Ren'Py nor this image.
 
 ```bash
 docker run --rm -it \
+  --cap_drop ALL \
+  --cap_add CAP_SETUID --cap_add CAP_SETGID \
+  --security-opt="no-new-privileges=true" \
   --network host \
+  -e PULSE_SERVER=${PULSE_SERVER:-} \
+  -e PULSE_COOKIE=/tmp/pulseaudio.cookie \
   -e DISPLAY \
-  -v /path/to/renpy/project:/src \
-  old6ix/renpy:8.0.3 /src
+  -v /mnt/wslg/PulseServer:/mnt/wslg/PulseServer \ # Remove if host is not WSL
+  -v ${RENPY_PROJECT}:/src \
+  slaash007/renpy:8.0.3 /src
 ```
 
 ### Run as non-root user
@@ -113,7 +142,7 @@ The following command will make distributions as user `1000` in group `1001`.
 docker run --rm -it \
   -e PUID=1000 -e PGID=1001 \
   -v ${PWD}/out:/out \
-  old6ix/renpy:8.0.3 launcher distribute ./the_question --dest /out
+  slaash007/renpy:8.0.3 launcher distribute ./the_question --dest /out
 ```
 
 *Note: Because of volume permissions in Docker, the output directory has to be created and is writable by the running user before executing this command, only except in rare cases.*
@@ -125,7 +154,7 @@ docker run --rm -it \
 ```bash
 export RENPY_VERSION=8.0.3  # expected version
 docker build \
-  -t old6ix/renpy:$RENPY_VERSION \
+  -t slaash007/renpy:$RENPY_VERSION \
   --build-arg RENPY_VERSION=$RENPY_VERSION \
   .
 ```
