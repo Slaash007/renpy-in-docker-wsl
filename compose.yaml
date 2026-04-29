@@ -1,0 +1,35 @@
+services:
+  renpy:
+    container_name: renpy
+    image: ghcr.io/slaash007/renpy:${RENPY_VERSION}
+    build:
+      context: .
+      args:
+        RENPY_VERSION: ${RENPY_VERSION}
+      tags:
+        - slaash007/renpy:${RENPY_VERSION}
+    cap_drop:
+      - ALL
+    cap_add:
+      - CAP_SETUID
+      - CAP_SETGID
+    security_opt:
+      - no-new-privileges
+    environment:
+      - DISPLAY=${DISPLAY:-:0}
+      - PULSE_SERVER=${PULSE_SERVER:-}
+      - PULSE_COOKIE=/tmp/pulseaudio.cookie
+      - PUID=1000
+      - PGID=1000
+      - RENPY_PATH_TO_SAVES=/saves
+    tmpfs:
+      - /tmp:uid=1000,gid=1000,mode=1777 # IDs need to be the same as env variables PUID and GUID.
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - /mnt/wslg/PulseServer:/mnt/wslg/PulseServer:rw # Comment if Host is not WSL
+      - ${RENPY_PROJECT}:/src:rw
+      - renpy-saves:/saves
+    network_mode: none
+
+volumes:
+  renpy-saves:
