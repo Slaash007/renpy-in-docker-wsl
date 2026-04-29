@@ -79,14 +79,14 @@ To run `The Question` as a demo, execute this command:
 
 ```bash
 docker run --rm -it \
-  --cap_drop ALL \
-  --cap_add CAP_SETUID --cap_add CAP_SETGID \
+  --cap-drop ALL \
+  --cap-add CAP_SETUID --cap-add CAP_SETGID \
   --security-opt="no-new-privileges=true" \
   -e DISPLAY \
   -e PULSE_SERVER=${PULSE_SERVER:-} \
   -e PULSE_COOKIE=/tmp/pulseaudio.cookie \
   -v /tmp/.X11-unix:/tmp/.X11-unix \
-  -v /mnt/wslg/PulseServer:/mnt/wslg/PulseServer \ # Remove if host is not WSL
+  -v /mnt/wslg/PulseServer:/mnt/wslg/PulseServer `# Remove if host is not WSL` \
   --tmpfs /tmp:mode=1777 \
   slaash007/renpy:8.0.3 ./the_question
 ```
@@ -103,14 +103,14 @@ export RENPY_PROJECT=/path/to/renpy/project
 
 ```bash
 docker run --rm -it \
-  --cap_drop ALL \
-  --cap_add CAP_SETUID --cap_add CAP_SETGID \
+  --cap-drop ALL \
+  --cap-add CAP_SETUID --cap-add CAP_SETGID \
   --security-opt="no-new-privileges=true" \
   -e DISPLAY \
   -e PULSE_SERVER=${PULSE_SERVER:-} \
   -e PULSE_COOKIE=/tmp/pulseaudio.cookie \
   -v /tmp/.X11-unix:/tmp/.X11-unix \
-  -v /mnt/wslg/PulseServer:/mnt/wslg/PulseServer \ # Remove if host is not WSL
+  -v /mnt/wslg/PulseServer:/mnt/wslg/PulseServer `# Remove if host is not WSL` \
   --tmpfs /tmp:mode=1777 \
   -v ${RENPY_PROJECT}:/src \
   slaash007/renpy:8.0.3 /src
@@ -120,14 +120,15 @@ Apart from unix socket, you can also connect it to the X server by changing the 
 
 ```bash
 docker run --rm -it \
-  --cap_drop ALL \
-  --cap_add CAP_SETUID --cap_add CAP_SETGID \
+  --cap-drop ALL \
+  --cap-add CAP_SETUID --cap-add CAP_SETGID \
   --security-opt="no-new-privileges=true" \
   --network host \
   -e PULSE_SERVER=${PULSE_SERVER:-} \
   -e PULSE_COOKIE=/tmp/pulseaudio.cookie \
   -e DISPLAY \
-  -v /mnt/wslg/PulseServer:/mnt/wslg/PulseServer \ # Remove if host is not WSL
+  -v /mnt/wslg/PulseServer:/mnt/wslg/PulseServer `# Remove if host is not WSL` \
+  --tmpfs /tmp:mode=1777 \
   -v ${RENPY_PROJECT}:/src \
   slaash007/renpy:8.0.3 /src
 ```
