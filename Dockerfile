@@ -19,7 +19,7 @@ FROM download-arm AS download-arm64
 FROM download-${TARGETARCH} AS download
 
 
-FROM debian:11.6-slim
+FROM debian:13.7-slim
 ARG RENPY_VERSION
 
 ENV RENPY_VERSION=${RENPY_VERSION}
